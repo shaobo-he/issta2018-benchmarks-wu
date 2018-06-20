@@ -1,4 +1,4 @@
-# Wu et al.’s ISSTA 2018 Artifact
+# Wu et al.’s ISSTA 2018 Benchmarks
 
 This is a collection of the benchmarks used in Wu et al.’s ISSTA 2018 paper *Eliminating Timing Side-Channel Leaks using Program Repair*.
 
