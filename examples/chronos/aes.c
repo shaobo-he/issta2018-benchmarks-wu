@@ -48,6 +48,7 @@
  */
 #include <stdint.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 #define AES_MIN_KEY_SIZE	16
 #define AES_MAX_KEY_SIZE	32
 #define AES_BLOCK_SIZE		16
@@ -1367,6 +1368,7 @@ void aes_decrypt(struct crypto_aes_ctx *ctx, uint8_t *out, const uint8_t *in)
 static uint8_t in_key[24] = {137, 40, 101, 222, 153, 0, 132, 17, 183, 221, 67, 28, 181, 138, 219, 124, 146, 164, 203, 219, 34, 82, 64, 174};
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0};
+/*
 int main(int argc, char *argv[])
 {
 	struct crypto_aes_ctx ctx;
@@ -1376,4 +1378,20 @@ int main(int argc, char *argv[])
 
   	return 0;
 
+}
+*/
+void aes_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  struct crypto_aes_ctx ctx;
+
+  crypto_aes_expand_key(key, &ctx, 24);
+  aes_encrypt(&ctx, out_buf, in_buf, 24);
+}
+
+CT_FUZZ_SPEC(void, aes_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 24);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }
