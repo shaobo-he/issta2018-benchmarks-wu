@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 #ifdef gem5
 #include "../util/m5/m5op.h"
@@ -864,6 +865,7 @@ void des_decrypt(struct des_ctx *ctx, uint8_t *dst, const uint8_t *src)
 static uint8_t in_key[32] = {158, 129, 54, 187, 32, 114, 26, 16, 82, 145, 246, 49, 17, 87, 72, 11, 124, 64, 2, 177, 44, 54, 235, 162, 241, 9, 69, 100, 36, 208, 166, 211};
 static uint8_t in[64] = {0x00};
 static 	uint8_t out[64] = {0};
+/*
 int main(int argc, char *argv[])
 {
 	struct des_ctx ctx;
@@ -872,4 +874,21 @@ int main(int argc, char *argv[])
     des_encrypt(&ctx, out, in);
 
 	return 0;
+}
+*/
+
+void des1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  struct des_ctx ctx;
+
+  des_ekey(key, ctx.expkey);
+  des_encrypt(&ctx, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, des1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 32);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }

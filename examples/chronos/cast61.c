@@ -18,6 +18,7 @@
  */
 #include <stdint.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 #define ror32(word,shift) (word >> shift) | (word << (32 - shift))
 #define rol32(word,shift) (word << shift) | (word >> (32 - shift))
@@ -504,6 +505,7 @@ void cast6_decrypt(struct cast6_ctx *c, uint8_t *outbuf, const uint8_t *inbuf)
 static uint8_t in_key[32] = {171, 124, 26, 1, 28, 58, 37, 38, 73, 55, 169, 62, 45, 157, 243, 189, 83, 23, 66, 202, 85, 241, 186, 75, 82, 12, 163, 232, 58, 132, 235, 61};
 static uint8_t in[16] = {0x00};
 static 	uint8_t out[16] = {0};
+/*
 int main(int argc, char *argv[])
 {
 	struct cast6_ctx ctx;
@@ -514,4 +516,21 @@ int main(int argc, char *argv[])
 
 	return 0;
 
+}
+*/
+
+void cast61_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  struct cast6_ctx ctx;
+
+  cast6_setkey(key, &ctx,32);
+  cast6_encrypt(&ctx, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, cast61_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 32);
+  CT_FUZZ_ASSUME(in_buf_len == 16);
+  CT_FUZZ_ASSUME(out_buf_len == 16);
 }

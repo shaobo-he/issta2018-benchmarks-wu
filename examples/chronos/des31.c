@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 #define ror32(word,shift) (word >> shift) | (word << (32 - shift))
 #define rol32(word,shift) (word << shift) | (word >> (32 - shift))
@@ -895,6 +896,7 @@ static uint8_t in_key[24]  __attribute__((aligned(64)))= {170, 189, 202, 248, 18
 static uint8_t in[64]  __attribute__((aligned(64)))= {0x00};
 static 	uint8_t out[64]  __attribute__((aligned(64)))= {0};
 
+/*
 int main(int argc, char *argv[])
 {
 	struct des3_ede_ctx ctx ;
@@ -903,4 +905,16 @@ int main(int argc, char *argv[])
     // des3_ede_encrypt(&ctx, out, in);
 
 	return 0;
+}
+*/
+
+void des31_wrapper(uint8_t* key) {
+	struct des3_ede_ctx ctx ;
+
+	des3_ede_setkey(key, &ctx,24);
+}
+
+CT_FUZZ_SPEC(void, des31_wrapper, uint8_t* key) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  CT_FUZZ_ASSUME(key_len == 24);
 }

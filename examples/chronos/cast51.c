@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 
 #define CAST5_BLOCK_SIZE 8
@@ -776,6 +777,7 @@ int cast5_setkey(uint8_t *key, struct cast5_ctx *c, unsigned key_len)
 static uint8_t in_key[32] = {106, 139, 57, 242, 5, 13, 124, 149, 252, 59, 194, 98, 165, 48, 191, 40, 221, 2, 119, 113, 100, 238, 122, 54, 46, 137, 193, 175, 230, 116, 196, 110};
 static uint8_t in[64] = {0x00};
 static 	uint8_t out[64] = {0};
+/*
 int main(int argc, char *argv[])
 {
 	struct cast5_ctx ctx;
@@ -797,4 +799,20 @@ int main(int argc, char *argv[])
 	// }
 	return 0;
 
+}
+*/
+
+void cast51_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  struct cast5_ctx ctx;
+  cast5_setkey(in_key, &ctx, 16);
+  cast5_encrypt(&ctx, out_buf, in_buf, ctx.rr);
+}
+
+CT_FUZZ_SPEC(void, cast51_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 16);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }
