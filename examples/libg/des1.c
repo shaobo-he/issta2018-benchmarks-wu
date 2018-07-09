@@ -114,6 +114,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "ct-fuzz.h"
 
 #define DES_BLOCKSIZE 8
 #define GPG_ERR_NO_ERROR 0
@@ -1477,6 +1478,7 @@ static uint8_t in_key[24]  __attribute__((aligned(64)))={143, 225, 19, 59, 80, 2
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0};
 
+/*
 int main()
 { 
     des_ctx ctx;
@@ -1484,4 +1486,19 @@ int main()
     des_ecb_crypt(ctx, in, out, MODE_ENC);
     return 0;
 }
+*/
 
+void des1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  des_ctx ctx;
+  des_setkey(key, ctx);
+  des_ecb_crypt(ctx, in_buf, out_buf, MODE_ENC);
+}
+
+CT_FUZZ_SPEC(void, des1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 24);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
+}

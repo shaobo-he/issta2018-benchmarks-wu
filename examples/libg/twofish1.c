@@ -38,6 +38,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "ct-fuzz.h"
 
 #define NUMKC 16
 #define GPG_ERR_NO_ERROR 0
@@ -1785,11 +1786,11 @@ static uint8_t in_key[16] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,  0
 static uint8_t in[16] = {0xC8, 0x23, 0xB8, 0xB7, 0x6B, 0xFE, 0x91, 0x13, 0x2F, 0xA7, 0x5E, 0xE6, 0x94, 0x77, 0x6F, 0x6B};
 static uint8_t out[16] = {0};
 
-int main()
-{
-  TWOFISH_context ctx;     /* Expanded key. */
-  do_twofish_setkey (in_key, &ctx, 16);
-  do_twofish_encrypt (&ctx, out, in);
+//int main()
+//{
+//  TWOFISH_context ctx;     /* Expanded key. */
+//  do_twofish_setkey (in_key, &ctx, 16);
+//  do_twofish_encrypt (&ctx, out, in);
 
   // int i, j;		    /* Loop counters. */
 
@@ -1876,10 +1877,24 @@ int main()
   //         "decryption failure!\n" : "decryption OK!\n");
   // printf ("elapsed time: %.1f s.\n", (float) timer / CLOCKS_PER_SEC);
 
-  return 0;
-}
+//  return 0;
+//}
 
 // #endif /* TEST */
+void twofish1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  TWOFISH_context ctx;     /* Expanded key. */
+  do_twofish_setkey (key, &ctx, 16);
+  do_twofish_encrypt (&ctx, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, twofish1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 16);
+  CT_FUZZ_ASSUME(in_buf_len == 16);
+  CT_FUZZ_ASSUME(out_buf_len == 16);
+}
 
 
 

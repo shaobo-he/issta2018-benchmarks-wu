@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "ct-fuzz.h"
 
 /* key constants */
 
@@ -638,6 +639,7 @@ void camellia_setup128(const unsigned char *key, uint32_t *subkey)
 
 static uint8_t in_key[24]  __attribute__((aligned(64)))={230, 206, 204, 99, 222, 174, 15, 99, 194, 200, 123, 233, 145, 84, 160, 149, 219, 114, 38, 185, 31, 54, 185, 40};
 
+/*
 int main()
 {   
     uint32_t subkey[50] = {0};
@@ -645,6 +647,17 @@ int main()
     
     return 0;
 
+}
+*/
+
+void camellia1_wrapper(uint8_t* key) {
+  uint32_t subkey[50] = {0};
+  camellia_setup128(key, subkey);
+}
+
+CT_FUZZ_SPEC(void, camellia1_wrapper, uint8_t* key) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  CT_FUZZ_ASSUME(key_len == 24);
 }
 
 // void camellia_setup256(const unsigned char *key, uint32_t *subkey)

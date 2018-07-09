@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "ct-fuzz.h"
 // #include "../util/m5/m5op.h"
 
 #define ANUBIS_MIN_KEY_SIZE	16
@@ -711,6 +712,7 @@ void anubis_crypt(uint32_t roundKey[ANUBIS_MAX_ROUNDS + 1][4],
 static uint8_t in_key[32] = {10, 128, 84, 188, 121, 182, 82, 33, 19, 131, 60, 40, 128, 5, 52, 166, 153, 163, 23, 207, 154, 138, 76, 96, 204, 55, 124, 134, 88, 171, 83, 71};
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0x00};
+/*
 int main(int argc, char *argv[])
 {
 	struct anubis_ctx ctx = {0};
@@ -721,4 +723,19 @@ int main(int argc, char *argv[])
 
 	return 0;
 
+}
+*/
+void anubis1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+	struct anubis_ctx ctx = {0};
+	anubis_setkey(key, &ctx, 24);
+	anubis_crypt(ctx.E, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, anubis1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 32);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }

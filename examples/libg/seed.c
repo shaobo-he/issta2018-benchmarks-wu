@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "ct-fuzz.h"
 
 #define NUMKC	16
 #define GPG_ERR_NO_ERROR 0
@@ -445,6 +446,7 @@ static const uint8_t in_key[16] = { 0x47, 0x06, 0x48, 0x08, 0x51, 0xE6, 0x1B, 0x
 static uint8_t in[16] = {0x83, 0xA2, 0xF8, 0xA2, 0x88, 0x64, 0x1F, 0xB9, 0xA4, 0xE9, 0xA5, 0xCC, 0x2F, 0x13, 0x1C, 0x7D};
 static uint8_t out[16] = {0};
 
+/*
 int main()
 {
     SEED_context ctx;
@@ -452,6 +454,22 @@ int main()
     do_encrypt (&ctx, out, in);
     return 0;
 
+}
+*/
+
+void seed_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  SEED_context ctx;
+  do_setkey (key, &ctx, 16);
+  do_encrypt (&ctx, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, seed_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 16);
+  CT_FUZZ_ASSUME(in_buf_len == 16);
+  CT_FUZZ_ASSUME(out_buf_len == 16);
 }
 
 /* Test a single encryption and decryption with each key size. */
