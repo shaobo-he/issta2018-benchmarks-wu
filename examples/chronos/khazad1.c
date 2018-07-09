@@ -19,6 +19,7 @@
  *
  */
 #include <stdint.h>
+#include "ct-fuzz.h"
 
 #define KHAZAD_KEY_SIZE		16
 #define KHAZAD_BLOCK_SIZE	8
@@ -831,6 +832,7 @@ void khazad_crypt(const uint64_t roundKey[KHAZAD_ROUNDS + 1],
 static uint8_t in_key[32] = {101, 70, 47, 14, 122, 80, 183, 67, 206, 210, 246, 249, 112, 240, 153, 113, 13, 37, 224, 87, 170, 209, 24, 101, 113, 215, 176, 107, 252, 40, 116, 124};
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0x00};
+/*
 int main(int argc, char *argv[])
 {
 	struct khazad_ctx ctx;
@@ -839,4 +841,20 @@ int main(int argc, char *argv[])
     khazad_crypt(ctx.E, out, in);
 
 	return 0;
+}
+*/
+void khazad1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  struct khazad_ctx ctx;
+
+  khazad_setkey(key, &ctx, 16);
+  khazad_crypt(ctx.E, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, khazad1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 16);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }

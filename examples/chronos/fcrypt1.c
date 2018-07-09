@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 #ifdef gem5
 #include "../util/m5/m5op.h"
@@ -391,6 +392,7 @@ int fcrypt_setkey(const uint8_t *key, struct fcrypt_ctx *ctx, unsigned int keyle
 static uint8_t in_key[32] = {228, 159, 237, 87, 198, 37, 198, 191, 202, 77, 55, 65, 82, 28, 239, 108, 250, 35, 56, 26, 111, 244, 109, 44, 248, 2, 0, 61, 174, 120, 117, 166};
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0x00};
+/*
 int main(int argc, char *argv[])
 {
 	struct fcrypt_ctx ctx;
@@ -399,4 +401,21 @@ int main(int argc, char *argv[])
     fcrypt_encrypt(&ctx, out, in);
 
 	return 0;
+}
+*/
+
+void fcrypt1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  struct fcrypt_ctx ctx;
+
+  fcrypt_setkey(key, &ctx, 8);
+  fcrypt_encrypt(&ctx, out_buf, in_buf);
+}
+
+CT_FUZZ_SPEC(void, fcrypt1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 8);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }
