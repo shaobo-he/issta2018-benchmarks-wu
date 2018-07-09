@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "ct-fuzz.h"
 
 #define LOKIBLK 8 /* No of bytes in a LOKI data-block */
 #define ROUNDS 16 /* No of LOKI rounds */
@@ -224,8 +225,22 @@ static short s(register int32_t i) /* return S-box value for input i */
 
 static char key[8] = {0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef};
 static char in[8] = {0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xe7};
+/*
 void main(void){
 	loki_ctx lc;
 	setlokikey(key, &lc);
 	enloki(&lc,in);
+}
+*/
+void loki91_wrapper(uint8_t* key, uint8_t* buf) {
+	loki_ctx lc;
+	setlokikey(key, &lc);
+	enloki(&lc,buf);
+}
+
+CT_FUZZ_SPEC(void, loki91_wrapper, uint8_t* key, uint8_t* buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
+  CT_FUZZ_ASSUME(key_len == 8);
+  CT_FUZZ_ASSUME(buf_len == 8);
 }

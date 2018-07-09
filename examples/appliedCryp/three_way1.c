@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "ct-fuzz.h"
 
 #define STRT_E 0x0b0b /* round constant of first encryption round */
 #define STRT_D 0xb1b1 /* round constant of first decryption round */
@@ -169,9 +170,24 @@ void twy_dec(twy_ctx *c, uint32_t *data, int blkcnt){
 static uint32_t key[3] __attribute__((aligned(64))) = {0xffffffff, 0xffffffff, 0xffffffff};
 static uint32_t in[3] __attribute__((aligned(64))) = {0};
 
+/*
 void main()
 {
 	twy_ctx gc;
 	twy_key(key, &gc);	
 	encrypt(&gc,in);
+}
+*/
+
+void three_way1_wrapper(uint32_t* a_key, uint32_t* buf) {
+	twy_ctx gc;
+	twy_key(a_key, &gc);	
+	encrypt(&gc,buf);
+}
+
+CT_FUZZ_SPEC(void, three_way1_wrapper, uint32_t* a_key, uint32_t* buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(a_key);
+  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
+  CT_FUZZ_ASSUME(key_len == 3);
+  CT_FUZZ_ASSUME(buf_len == 3);
 }
