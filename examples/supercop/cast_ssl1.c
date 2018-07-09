@@ -7,6 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 #include <stdint.h>
+#include "ct-fuzz.h"
 
 
 typedef struct cast_key_st {
@@ -927,6 +928,7 @@ void CAST_decrypt(const CAST_KEY *key,uint64_t *data)
 static uint8_t in_key[32] = {93, 74, 26, 198, 16, 113, 137, 114, 117, 40, 48, 223, 125, 189, 247, 90, 89, 116, 159, 149, 232, 237, 228, 249, 141, 169, 7, 179, 124, 95, 75, 155};
 static uint8_t in[64] = {0x00};
 
+/*
 int main(int argc, char *argv[])
 {
     CAST_KEY key;
@@ -937,4 +939,20 @@ int main(int argc, char *argv[])
 
     return 0;
 
+}
+*/
+
+void cast_ssl1_wrapper(uint8_t* key, uint8_t* buf) {
+    CAST_KEY c_key;
+    uint64_t *data = (uint64_t *)buf;
+
+    CAST_set_key(key, &c_key, 16);
+    CAST_encrypt(&c_key,data);
+}
+
+CT_FUZZ_SPEC(void, cast_ssl1_wrapper, uint8_t* key, uint8_t* buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
+  CT_FUZZ_ASSUME(key_len == 32);
+  CT_FUZZ_ASSUME(buf_len == 64);
 }

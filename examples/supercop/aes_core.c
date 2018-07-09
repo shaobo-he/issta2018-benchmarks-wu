@@ -37,6 +37,7 @@
    compatible API */
 
 #include <stdint.h>
+#include "ct-fuzz.h"
 
 
 #  define GETU32(pt) (((uint32_t)(pt)[0] << 24) ^ ((uint32_t)(pt)[1] << 16) ^ ((uint32_t)(pt)[2] <<  8) ^ ((uint32_t)(pt)[3]))
@@ -1166,6 +1167,7 @@ static uint8_t key[24] = {0xf8, 0x12, 0x7e, 0x00, 0x00, 0x00, 0x6c, 0x7e, 0x81, 
 static uint8_t in[64] = {0x00};
 static  uint8_t out[64] = {0};
 
+/*
 int main() 
 {
 	unsigned char key[16];
@@ -1174,4 +1176,20 @@ int main()
  	AES_set_encrypt_key(key, 128, &e_key);
 
 	AES_encrypt(in, out, &e_key);
+}
+*/
+
+void aes_core_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  AES_KEY e_key;
+  AES_set_encrypt_key(key, 128, &e_key);
+  AES_encrypt(in_buf, out_buf, &e_key);
+}
+
+CT_FUZZ_SPEC(void, aes_core_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
+  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
+  CT_FUZZ_ASSUME(key_len == 16);
+  CT_FUZZ_ASSUME(in_buf_len == 64);
+  CT_FUZZ_ASSUME(out_buf_len == 64);
 }

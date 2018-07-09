@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 #ifdef gem5
 #include "../util/m5/m5op.h"
@@ -994,6 +995,7 @@ static uint8_t in_key[24] = {0xf8, 0x12, 0x7e, 0x00, 0x00, 0x00, 0x6c, 0x7e, 0x8
 static uint8_t in[64] = {0x00};
 static 	uint8_t out[64] = {0};
 
+/*
 int main(int argc, char *argv[])
 {
 	
@@ -1002,4 +1004,19 @@ int main(int argc, char *argv[])
 	RunEncryptionKeySchedule(in_key, roundKeys);
     LBlock_encrypt(roundKeys, in);
 	return 0;
+}
+*/
+
+void LBlock1_wrapper(uint8_t* key, uint8_t* buf) {
+  uint8_t roundKeys[128];
+
+  RunEncryptionKeySchedule(key, roundKeys);
+  LBlock_encrypt(roundKeys, buf);
+}
+
+CT_FUZZ_SPEC(void, LBlock1_wrapper, uint8_t* key, uint8_t* buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
+  CT_FUZZ_ASSUME(key_len == 24);
+  CT_FUZZ_ASSUME(buf_len == 64);
 }

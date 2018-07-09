@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "ct-fuzz.h"
 
 #ifdef gem5
 #include "../util/m5/m5op.h"
@@ -244,6 +245,7 @@ void RunEncryptionKeySchedule(uint8_t *key, uint8_t *roundKeys)
 static uint8_t in_key[24] = {0xf8, 0x12, 0x7e, 0x00, 0x00, 0x00, 0x6c, 0x7e, 0x81, 0x93, 0xa5, 0xb7, 0xc9, 0xda, 0xec, 0xfe, 0x11, 0x32, 0x53, 0x74, 0x95, 0xb6, 0xd7, 0xf8};
 static uint8_t in[64] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+/*
 int main(int argc, char *argv[])
 {	
 	uint8_t roundKeys[288];
@@ -256,4 +258,18 @@ int main(int argc, char *argv[])
 	// }
 	return 0;
 
+}
+*/
+
+void TWINE_encrypt2_wrapper(uint8_t* key, uint8_t* buf) {
+  uint8_t roundKeys[288];
+  RunEncryptionKeySchedule(key, roundKeys);
+  TWINE_encrypt(roundKeys, buf);
+}
+
+CT_FUZZ_SPEC(void, TWINE_encrypt2_wrapper, uint8_t* key, uint8_t* buf) {
+  unsigned short key_len = __ct_fuzz_get_arr_len(key);
+  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
+  CT_FUZZ_ASSUME(key_len == 24);
+  CT_FUZZ_ASSUME(buf_len == 64);
 }
