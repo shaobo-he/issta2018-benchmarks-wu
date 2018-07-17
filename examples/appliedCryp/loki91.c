@@ -244,3 +244,9 @@ CT_FUZZ_SPEC(void, loki91_wrapper, uint8_t* key, uint8_t* buf) {
   CT_FUZZ_ASSUME(key_len == 8);
   CT_FUZZ_ASSUME(buf_len == 8);
 }
+
+CT_FUZZ_SEED(void, loki91_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 8, {0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef})
+  SEED_1D_ARR(uint8_t, buf, 8, {0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xe7})
+  PRODUCE(loki91_wrapper,key,buf)
+}

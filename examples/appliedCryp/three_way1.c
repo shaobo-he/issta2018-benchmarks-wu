@@ -191,3 +191,9 @@ CT_FUZZ_SPEC(void, three_way1_wrapper, uint32_t* a_key, uint32_t* buf) {
   CT_FUZZ_ASSUME(key_len == 3);
   CT_FUZZ_ASSUME(buf_len == 3);
 }
+
+CT_FUZZ_SEED(void, three_way1_wrapper, uint32_t*, uint32_t*) {
+  SEED_1D_ARR(uint32_t, key, 3, {0xffffffff, 0xffffffff, 0xffffffff})
+  SEED_1D_ARR(uint32_t, buf, 3, {0})
+  PRODUCE(three_way1_wrapper,key,buf)
+}
