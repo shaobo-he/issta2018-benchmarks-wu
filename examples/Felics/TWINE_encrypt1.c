@@ -263,3 +263,9 @@ CT_FUZZ_SPEC(void, TWINE_encrypt1_wrapper, uint8_t* key, uint8_t* buf) {
   CT_FUZZ_ASSUME(key_len == 24);
   CT_FUZZ_ASSUME(buf_len == 64);
 }
+
+CT_FUZZ_SEED(void, TWINE_encrypt1_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 24, {0x00, 0x01, 0x00, 0x00})
+  SEED_1D_ARR(uint8_t, buf, 64, {0x01, 0x00, 0x00, 0x00, 0x00, 0x00})
+  PRODUCE(TWINE_encrypt1_wrapper, key, buf)
+}

@@ -520,7 +520,7 @@ int main(int argc, char *argv[])
 */
 
 void cast61_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
-  struct cast6_ctx ctx;
+  struct cast6_ctx ctx = {0};
 
   cast6_setkey(key, &ctx,32);
   cast6_encrypt(&ctx, out_buf, in_buf);
@@ -533,4 +533,11 @@ CT_FUZZ_SPEC(void, cast61_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_b
   CT_FUZZ_ASSUME(key_len == 32);
   CT_FUZZ_ASSUME(in_buf_len == 16);
   CT_FUZZ_ASSUME(out_buf_len == 16);
+}
+
+CT_FUZZ_SEED(void, cast61_wrapper, uint8_t*, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32,{171, 124, 26, 1, 28, 58, 37, 38, 73, 55, 169, 62, 45, 157, 243, 189, 83, 23, 66, 202, 85, 241, 186, 75, 82, 12, 163, 232, 58, 132, 235, 61}) 
+  SEED_1D_ARR(uint8_t, in_buf, 16, {0x00})
+  SEED_1D_ARR(uint8_t, out_buf, 16, {0})
+  PRODUCE(cast61_wrapper, key, in_buf, out_buf)
 }

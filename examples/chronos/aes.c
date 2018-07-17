@@ -1395,3 +1395,10 @@ CT_FUZZ_SPEC(void, aes_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf)
   CT_FUZZ_ASSUME(in_buf_len == 64);
   CT_FUZZ_ASSUME(out_buf_len == 64);
 }
+
+CT_FUZZ_SEED(void, aes_wrapper, uint8_t*, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 24,{137, 40, 101, 222, 153, 0, 132, 17, 183, 221, 67, 28, 181, 138, 219, 124, 146, 164, 203, 219, 34, 82, 64, 174}) 
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  SEED_1D_ARR(uint8_t, out_buf, 64, {0})
+  PRODUCE(aes_wrapper, key, in_buf, out_buf)
+}

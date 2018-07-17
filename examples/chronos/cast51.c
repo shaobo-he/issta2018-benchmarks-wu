@@ -812,7 +812,14 @@ CT_FUZZ_SPEC(void, cast51_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_b
   unsigned short key_len = __ct_fuzz_get_arr_len(key);
   unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
   unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
-  CT_FUZZ_ASSUME(key_len == 16);
+  CT_FUZZ_ASSUME(key_len == 32);
   CT_FUZZ_ASSUME(in_buf_len == 64);
   CT_FUZZ_ASSUME(out_buf_len == 64);
+}
+
+CT_FUZZ_SEED(void, cast51_wrapper, uint8_t*, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32,{106, 139, 57, 242, 5, 13, 124, 149, 252, 59, 194, 98, 165, 48, 191, 40, 221, 2, 119, 113, 100, 238, 122, 54, 46, 137, 193, 175, 230, 116, 196, 110}) 
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  SEED_1D_ARR(uint8_t, out_buf, 64, {0})
+  PRODUCE(cast51_wrapper, key, in_buf, out_buf)
 }

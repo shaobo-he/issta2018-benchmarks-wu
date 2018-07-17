@@ -415,7 +415,14 @@ CT_FUZZ_SPEC(void, fcrypt1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_
   unsigned short key_len = __ct_fuzz_get_arr_len(key);
   unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
   unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
-  CT_FUZZ_ASSUME(key_len == 8);
+  CT_FUZZ_ASSUME(key_len == 32);
   CT_FUZZ_ASSUME(in_buf_len == 64);
   CT_FUZZ_ASSUME(out_buf_len == 64);
+}
+
+CT_FUZZ_SEED(void, fcrypt1_wrapper, uint8_t*, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32,{228, 159, 237, 87, 198, 37, 198, 191, 202, 77, 55, 65, 82, 28, 239, 108, 250, 35, 56, 26, 111, 244, 109, 44, 248, 2, 0, 61, 174, 120, 117, 166}) 
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  SEED_1D_ARR(uint8_t, out_buf, 64, {0})
+  PRODUCE(fcrypt1_wrapper, key, in_buf, out_buf)
 }

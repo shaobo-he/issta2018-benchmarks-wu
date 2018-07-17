@@ -918,3 +918,8 @@ CT_FUZZ_SPEC(void, des31_wrapper, uint8_t* key) {
   unsigned short key_len = __ct_fuzz_get_arr_len(key);
   CT_FUZZ_ASSUME(key_len == 24);
 }
+
+CT_FUZZ_SEED(void, des31_wrapper, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 24, {170, 189, 202, 248, 185, 48, 3, 81, 240, 81, 249, 222, 216, 96, 89, 207, 96, 74, 156, 52, 173, 112, 8, 152})
+  PRODUCE(des31_wrapper, key)
+}
