@@ -1896,7 +1896,12 @@ CT_FUZZ_SPEC(void, twofish1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out
   CT_FUZZ_ASSUME(out_buf_len == 16);
 }
 
-
+CT_FUZZ_SEED(void, twofish1_wrapper, uint8_t*, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 16, {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF})
+  SEED_1D_ARR(uint8_t, in_buf, 16, {0xC8, 0x23, 0xB8, 0xB7, 0x6B, 0xFE, 0x91, 0x13, 0x2F, 0xA7, 0x5E, 0xE6, 0x94, 0x77, 0x6F, 0x6B})
+  SEED_1D_ARR(uint8_t, out_buf, 16, {0})
+  PRODUCE(twofish1_wrapper, key, in_buf, out_buf)
+}
 
 // gcry_cipher_spec_t _gcry_cipher_spec_twofish =
 //   {

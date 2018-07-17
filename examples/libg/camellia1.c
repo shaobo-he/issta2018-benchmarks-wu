@@ -660,8 +660,14 @@ CT_FUZZ_SPEC(void, camellia1_wrapper, uint8_t* key) {
   CT_FUZZ_ASSUME(key_len == 24);
 }
 
+CT_FUZZ_SEED(void, camellia1_wrapper, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 24, {230, 206, 204, 99, 222, 174, 15, 99, 194, 200, 123, 233, 145, 84, 160, 149, 219, 114, 38, 185, 31, 54, 185, 40})
+  PRODUCE(camellia1_wrapper, key)
+}
+
 // void camellia_setup256(const unsigned char *key, uint32_t *subkey)
 // {
+//     l
 //     uint32_t kll,klr,krl,krr;           /* left half of key */
 //     uint32_t krll,krlr,krrl,krrr;       /* right half of key */
 //     uint32_t il, ir, t0, t1, w0, w1;    /* temporary variables */

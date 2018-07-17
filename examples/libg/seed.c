@@ -472,6 +472,13 @@ CT_FUZZ_SPEC(void, seed_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf
   CT_FUZZ_ASSUME(out_buf_len == 16);
 }
 
+CT_FUZZ_SEED(void, seed_wrapper, uint8_t*, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 16, {0x47, 0x06, 0x48, 0x08, 0x51, 0xE6, 0x1B, 0xE8, 0x5D, 0x74, 0xBF, 0xB3, 0xFD, 0x95, 0x61, 0x85})
+  SEED_1D_ARR(uint8_t, in_buf, 16, {0x83, 0xA2, 0xF8, 0xA2, 0x88, 0x64, 0x1F, 0xB9, 0xA4, 0xE9, 0xA5, 0xCC, 0x2F, 0x13, 0x1C, 0x7D})
+  SEED_1D_ARR(uint8_t, out_buf, 16, {0})
+  PRODUCE(seed_wrapper, key, in_buf, out_buf)
+}
+
 /* Test a single encryption and decryption with each key size. */
 // static const char*
 // selftest (void)
