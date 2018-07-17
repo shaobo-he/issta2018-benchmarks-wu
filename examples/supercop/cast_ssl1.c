@@ -956,3 +956,9 @@ CT_FUZZ_SPEC(void, cast_ssl1_wrapper, uint8_t* key, uint8_t* buf) {
   CT_FUZZ_ASSUME(key_len == 32);
   CT_FUZZ_ASSUME(buf_len == 64);
 }
+
+CT_FUZZ_SEED(void, cast_ssl1_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32, {93, 74, 26, 198, 16, 113, 137, 114, 117, 40, 48, 223, 125, 189, 247, 90, 89, 116, 159, 149, 232, 237, 228, 249, 141, 169, 7, 179, 124, 95, 75, 155})
+  SEED_1D_ARR(uint8_t, buf, 64, {0x00})
+  PRODUCE(cast_ssl1_wrapper, key, buf);
+}
