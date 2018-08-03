@@ -186,10 +186,8 @@ void three_way1_wrapper(uint32_t* a_key, uint32_t* buf) {
 }
 
 CT_FUZZ_SPEC(void, three_way1_wrapper, uint32_t* a_key, uint32_t* buf) {
-  unsigned short key_len = __ct_fuzz_get_arr_len(a_key);
-  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
-  CT_FUZZ_ASSUME(key_len == 3);
-  CT_FUZZ_ASSUME(buf_len == 3);
+  __ct_fuzz_ptr_len(a_key, 3, 3);
+  __ct_fuzz_ptr_len(buf, 3, 3);
 }
 
 CT_FUZZ_SEED(void, three_way1_wrapper, uint32_t*, uint32_t*) {

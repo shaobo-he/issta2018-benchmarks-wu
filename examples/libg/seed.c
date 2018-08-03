@@ -464,12 +464,9 @@ void seed_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
 }
 
 CT_FUZZ_SPEC(void, seed_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
-  unsigned short key_len = __ct_fuzz_get_arr_len(key);
-  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
-  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
-  CT_FUZZ_ASSUME(key_len == 16);
-  CT_FUZZ_ASSUME(in_buf_len == 16);
-  CT_FUZZ_ASSUME(out_buf_len == 16);
+  __ct_fuzz_ptr_len(key, 16, 16);
+  __ct_fuzz_ptr_len(in_buf, 16, 16);
+  __ct_fuzz_ptr_len(out_buf, 16, 16);
 }
 
 CT_FUZZ_SEED(void, seed_wrapper, uint8_t*, uint8_t*, uint8_t*) {

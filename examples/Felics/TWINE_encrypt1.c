@@ -258,10 +258,8 @@ void TWINE_encrypt1_wrapper(uint8_t* key, uint8_t* buf) {
 }
 
 CT_FUZZ_SPEC(void, TWINE_encrypt1_wrapper, uint8_t* key, uint8_t* buf) {
-  unsigned short key_len = __ct_fuzz_get_arr_len(key);
-  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
-  CT_FUZZ_ASSUME(key_len == 24);
-  CT_FUZZ_ASSUME(buf_len == 64);
+  __ct_fuzz_ptr_len(key, 24, 24);
+  __ct_fuzz_ptr_len(buf, 64, 64);
 }
 
 CT_FUZZ_SEED(void, TWINE_encrypt1_wrapper, uint8_t*, uint8_t*) {

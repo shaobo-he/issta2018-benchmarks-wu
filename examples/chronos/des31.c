@@ -915,8 +915,7 @@ void des31_wrapper(uint8_t* key) {
 }
 
 CT_FUZZ_SPEC(void, des31_wrapper, uint8_t* key) {
-  unsigned short key_len = __ct_fuzz_get_arr_len(key);
-  CT_FUZZ_ASSUME(key_len == 24);
+  __ct_fuzz_ptr_len(key, 24, 24);
 }
 
 CT_FUZZ_SEED(void, des31_wrapper, uint8_t*) {

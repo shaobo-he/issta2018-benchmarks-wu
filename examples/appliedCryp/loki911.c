@@ -243,10 +243,8 @@ void loki911_wrapper(uint8_t* key, uint8_t* buf) {
 }
 
 CT_FUZZ_SPEC(void, loki911_wrapper, uint8_t* key, uint8_t* buf) {
-  unsigned short key_len = __ct_fuzz_get_arr_len(key);
-  unsigned short buf_len = __ct_fuzz_get_arr_len(buf);
-  CT_FUZZ_ASSUME(key_len == 24);
-  CT_FUZZ_ASSUME(buf_len == 8);
+  __ct_fuzz_ptr_len(key, 24, 24);
+  __ct_fuzz_ptr_len(buf, 8, 8);
 }
 
 CT_FUZZ_SEED(void, loki911_wrapper, uint8_t*, uint8_t*) {

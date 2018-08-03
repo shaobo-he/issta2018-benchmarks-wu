@@ -732,12 +732,9 @@ void anubis1_wrapper(uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
 }
 
 CT_FUZZ_SPEC(void, anubis1_wrapper, uint8_t* key, uint8_t* in_buf, uint8_t* out_buf) {
-  unsigned short key_len = __ct_fuzz_get_arr_len(key);
-  unsigned short in_buf_len = __ct_fuzz_get_arr_len(in_buf);
-  unsigned short out_buf_len = __ct_fuzz_get_arr_len(out_buf);
-  CT_FUZZ_ASSUME(key_len == 32);
-  CT_FUZZ_ASSUME(in_buf_len == 64);
-  CT_FUZZ_ASSUME(out_buf_len == 64);
+  __ct_fuzz_ptr_len(key, 32, 32);
+  __ct_fuzz_ptr_len(in_buf, 64, 64);
+  __ct_fuzz_ptr_len(out_buf, 64, 64);
 }
 
 CT_FUZZ_SEED(void, anubis1_wrapper, uint8_t*, uint8_t*, uint8_t*) {
