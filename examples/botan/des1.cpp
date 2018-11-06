@@ -13,6 +13,8 @@
 #include <vector>
 #include <cstring>
 
+#include "ct-fuzz.h"
+
 /**
 * Bit rotation right
 * @param input the input word
@@ -807,6 +809,7 @@ static uint8_t in_key[32] = {122, 226, 218, 232, 39, 175, 48, 56, 239, 230, 28, 
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0};
 
+/*
 int main()
 {
    std::vector<uint32_t> m_round_key;
@@ -832,4 +835,42 @@ int main()
     store_be(T, out);
 
    return 0;
+}
+*/
+
+extern "C" {
+void des1_wrapper(uint8_t* key, uint8_t* in_buf) {
+   std::vector<uint32_t> m_round_key;
+   m_round_key.resize(32);
+
+   des_key_schedule(key, m_round_key.data());
+
+   uint64_t T = (DES_IPTAB1[in_buf[0]]     ) | (DES_IPTAB1[in_buf[1]] << 1) |
+                 (DES_IPTAB1[in_buf[2]] << 2) | (DES_IPTAB1[in_buf[3]] << 3) |
+                 (DES_IPTAB1[in_buf[4]] << 4) | (DES_IPTAB1[in_buf[5]] << 5) |
+                 (DES_IPTAB1[in_buf[6]] << 6) | (DES_IPTAB2[in_buf[7]]     );
+
+    uint32_t L = static_cast<uint32_t>(T >> 32);
+    uint32_t R = static_cast<uint32_t>(T);
+
+    des_encrypt(m_round_key.data(),L, R);
+    // T = (DES_FPTAB1[get_byte(0, L)] << 5) | (DES_FPTAB1[get_byte(1, L)] << 3) |
+    //     (DES_FPTAB1[get_byte(2, L)] << 1) | (DES_FPTAB2[get_byte(3, L)] << 1) |
+    //     (DES_FPTAB1[get_byte(0, R)] << 4) | (DES_FPTAB1[get_byte(1, R)] << 2) |
+    //     (DES_FPTAB1[get_byte(2, R)]     ) | (DES_FPTAB2[get_byte(3, R)]     );
+    // T = rotate_left(T, 32);
+
+    store_be(T, out);
+}
+
+CT_FUZZ_SPEC(void, des1_wrapper, uint8_t* key, uint8_t* in_buf) {
+  __ct_fuzz_ptr_len(key, 32, 32);
+  __ct_fuzz_ptr_len(in_buf, 64, 64);
+}
+
+CT_FUZZ_SEED(void, des1_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32,{122, 226, 218, 232, 39, 175, 48, 56, 239, 230, 28, 159, 167, 225, 101, 6, 166, 189, 146, 140, 192, 175, 21, 96, 224, 7, 112, 253, 167, 145, 236, 47})
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  PRODUCE(des1_wrapper, const_cast<uint8_t*>(key), const_cast<uint8_t*>(in_buf))
+}
 }

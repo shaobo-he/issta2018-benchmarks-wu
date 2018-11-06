@@ -9,6 +9,8 @@
 #include <vector>
 #include <cstring>
 
+#include "ct-fuzz.h"
+
 const uint32_t SEED_S0[256] = {
    0x2989A1A8, 0x05858184, 0x16C6D2D4, 0x13C3D3D0, 0x14445054, 0x1D0D111C,
    0x2C8CA0AC, 0x25052124, 0x1D4D515C, 0x03434340, 0x18081018, 0x1E0E121C,
@@ -344,10 +346,31 @@ static uint8_t in_key[24] = {0xf8, 0x12, 0x7e, 0x00, 0x00, 0x00, 0x6c, 0x7e, 0x8
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0};
 
+/*
 int main()
 {
    std::vector<uint32_t> m_K;
    key_schedule(in_key, m_K, 16);
    encrypt_n(m_K, in, out);
    return 0;
+}
+*/
+
+extern "C" {
+void seed_wrapper(uint8_t* key, uint8_t* in_buf) {
+   std::vector<uint32_t> m_K;
+   key_schedule(key, m_K, 16);
+   encrypt_n(m_K, in_buf, out);
+}
+
+CT_FUZZ_SPEC(void, seed_wrapper, uint8_t* key, uint8_t* in_buf) {
+  __ct_fuzz_ptr_len(key, 24, 24);
+  __ct_fuzz_ptr_len(in_buf, 64, 64);
+}
+
+CT_FUZZ_SEED(void, seed_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 24,{0xf8, 0x12, 0x7e, 0x00, 0x00, 0x00, 0x6c, 0x7e, 0x81, 0x93, 0xa5, 0xb7, 0xc9, 0xda, 0xec, 0xfe, 0x11, 0x32, 0x53, 0x74, 0x95, 0xb6, 0xd7, 0xf8})
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  PRODUCE(seed_wrapper, const_cast<uint8_t*>(key), const_cast<uint8_t*>(in_buf))
+}
 }

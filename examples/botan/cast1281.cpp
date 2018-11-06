@@ -10,6 +10,8 @@
 #include <vector>
 #include <cstring>
 
+#include "ct-fuzz.h"
+
 
 /**
 * Byte extraction
@@ -606,6 +608,7 @@ static uint8_t in_key[32] = {116, 83, 200, 204, 227, 1, 238, 197, 106, 107, 132,
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0};
 
+/*
 int main()
 {
    std::vector<uint32_t> m_MK;
@@ -614,4 +617,26 @@ int main()
    key_schedule(in_key, m_MK, m_RK);
    encrypt_n(m_MK, m_RK, in, out);
    return 0;
+}
+*/
+
+extern "C" {
+void cast1281_wrapper(uint8_t* key, uint8_t* in_buf) {
+   std::vector<uint32_t> m_MK;
+   std::vector<uint8_t> m_RK;
+
+   key_schedule(key, m_MK, m_RK);
+   encrypt_n(m_MK, m_RK, in_buf, out);
+}
+
+CT_FUZZ_SPEC(void, cast1281_wrapper, uint8_t* key, uint8_t* in_buf) {
+  __ct_fuzz_ptr_len(key, 32, 32);
+  __ct_fuzz_ptr_len(in_buf, 64, 64);
+}
+
+CT_FUZZ_SEED(void, cast1281_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32,{116, 83, 200, 204, 227, 1, 238, 197, 106, 107, 132, 219, 90, 54, 235, 206, 148, 191, 203, 76, 47, 111, 197, 159, 155, 92, 251, 156, 54, 99, 87, 238})
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  PRODUCE(cast1281_wrapper, const_cast<uint8_t*>(key), const_cast<uint8_t*>(in_buf))
+}
 }

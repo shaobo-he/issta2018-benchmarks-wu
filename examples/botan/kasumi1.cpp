@@ -10,7 +10,7 @@
 #include <vector>
 #include <cstring>
 
-
+#include "ct-fuzz.h"
 
 inline uint8_t get_byte(const unsigned n, const uint32_t x) __attribute__((always_inline))
 {
@@ -265,6 +265,7 @@ static uint8_t in_key[32] = {144, 190, 242, 175, 64, 181, 31, 59, 170, 11, 25, 1
 static uint8_t in[64] = {0x00};
 static uint8_t out[64] = {0};
 
+/*
 int main()
 {
 
@@ -273,4 +274,25 @@ int main()
    key_schedule(in_key, m_EK, 16);
    encrypt_n(m_EK, in, out);
    return 0;
+}
+*/
+
+extern "C" {
+void kasumi1_wrapper(uint8_t* key, uint8_t* in_buf) {
+   std::vector<uint16_t> m_EK;
+
+   key_schedule(key, m_EK, 16);
+   encrypt_n(m_EK, in_buf, out);
+}
+
+CT_FUZZ_SPEC(void, kasumi1_wrapper, uint8_t* key, uint8_t* in_buf) {
+  __ct_fuzz_ptr_len(key, 32, 32);
+  __ct_fuzz_ptr_len(in_buf, 64, 64);
+}
+
+CT_FUZZ_SEED(void, kasumi1_wrapper, uint8_t*, uint8_t*) {
+  SEED_1D_ARR(uint8_t, key, 32,{144, 190, 242, 175, 64, 181, 31, 59, 170, 11, 25, 187, 240, 123, 19, 248, 244, 153, 94, 235, 188, 99, 209, 54, 244, 130, 138, 243, 59, 158, 232, 30})
+  SEED_1D_ARR(uint8_t, in_buf, 64, {0x00})
+  PRODUCE(kasumi1_wrapper, const_cast<uint8_t*>(key), const_cast<uint8_t*>(in_buf))
+}
 }
